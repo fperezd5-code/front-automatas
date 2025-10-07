@@ -12,6 +12,7 @@ let stickers = [];
 let users = [];
 let sessions = [];
 
+
 // API Configuration
 const API_BASE_URL = 'https://proyecto-automatas.onrender.com/api';
 
@@ -351,7 +352,6 @@ function addSticker(emoji) {
 
   editedPhoto = canvas.toDataURL();
 }
-
 
 async function finishRegistration() {
   const email = document.getElementById('email').value;
@@ -914,6 +914,7 @@ function showDashboard(user) {
 
   document.querySelector('.form-container').innerHTML = dashboardHTML;
 }
+
 function logout() {
   location.reload();
 }
