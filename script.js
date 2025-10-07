@@ -12,7 +12,6 @@ let stickers = [];
 let users = [];
 let sessions = [];
 
-
 // API Configuration
 const API_BASE_URL = 'https://proyecto-automatas.onrender.com/api';
 
