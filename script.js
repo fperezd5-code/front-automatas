@@ -352,7 +352,6 @@ function addSticker(emoji) {
   editedPhoto = canvas.toDataURL();
 }
 
-
 async function finishRegistration() {
   const email = document.getElementById('email').value;
   const phone = document.getElementById('phone').value;
@@ -914,6 +913,7 @@ function showDashboard(user) {
 
   document.querySelector('.form-container').innerHTML = dashboardHTML;
 }
+
 function logout() {
   location.reload();
 }
