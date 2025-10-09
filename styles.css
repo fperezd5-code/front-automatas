@@ -68,7 +68,7 @@ body:before {
 
 .form-header h1 {
   font-size: 28px;
-  font-weight: 300;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -78,21 +78,14 @@ body:before {
   margin-top: 5px;
 }
 
-.thumbnail {
-  background: rgba(255, 255, 255, 0.2);
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 20px;
-  padding: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.thumbnail i {
-  font-size: 32px;
-  color: white;
+.thumbnail img {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  object-fit: contain; 
+  display: block;
+  margin: auto;
+  margin-bottom: 18px;
 }
 
 .timer {
