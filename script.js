@@ -108,6 +108,8 @@ function clearRegistrationForm() {
   document.getElementById('birthdate').value = '';
   document.getElementById('nickname').value = '';
   document.getElementById('password').value = '';
+  document.getElementById('confirm-password').value = '';
+
 
   selectedNotificationMethods = [];
   document.querySelectorAll('.notification-option').forEach(opt => opt.classList.remove('selected'));
@@ -148,9 +150,10 @@ function nextStep() {
     } else if (currentStep === 3) {
       startCamera();
     } else if (currentStep === 4) {
-      // Llamar a finishRegistration cuando llegamos al paso 4
-      // El paso 4 se mostrará solo si el registro es exitoso
+      // NO avanzar automáticamente al paso 4
+      // La función finishRegistration se encargará de mostrar el paso 4 solo si es exitoso
       finishRegistration();
+      return; // Importante: detener la ejecución aquí
     }
   }
 }
@@ -170,8 +173,9 @@ function validateCurrentStep() {
       const birthdate = document.getElementById('birthdate').value;
       const nickname = document.getElementById('nickname').value;
       const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
 
-      if (!email || !phone || !nickname || !password) {
+      if (!email || !phone || !nickname || !password || !confirmPassword) {
         showAlert('Por favor complete todos los campos', 'danger');
         return false;
       }
@@ -184,6 +188,19 @@ function validateCurrentStep() {
 
       if (phone.length !== 8 || !/^\d{8}$/.test(phone)) {
         showAlert('El teléfono debe tener exactamente 8 dígitos', 'danger');
+        return false;
+      }
+
+      if (password !== confirmPassword) {
+        showAlert('Las contraseñas no coinciden. Por favor verifique.', 'danger');
+        // Limpiar solo el campo de confirmar contraseña
+        document.getElementById('confirm-password').value = '';
+        document.getElementById('confirm-password').focus();
+        return false;
+      }
+
+      if (password.length < 6) {
+        showAlert('La contraseña debe tener al menos 6 caracteres', 'danger');
         return false;
       }
 
@@ -209,7 +226,7 @@ function validateCurrentStep() {
 }
 
 function updateProgress() {
-  const progress = (currentStep / 4) * 100;
+  const progress = (currentStep / 5) * 100;
   document.getElementById('progress-bar').style.width = progress + '%';
 }
 
@@ -386,9 +403,8 @@ async function finishRegistration() {
     imagen_referencia: imageBase64
   };
 
-  // Mostrar indicador de carga
-  showAlert('Registrando usuario...', 'info');
-  document.getElementById('loading-spinner').classList.remove('hidden');
+  // Mostrar solo el spinner de carga, SIN mensaje de alerta
+  //document.getElementById('loading-spinner').classList.remove('hidden');
 
   try {
     const response = await fetch(`${API_BASE_URL}/usuarios/registro`, {
@@ -400,7 +416,9 @@ async function finishRegistration() {
     });
 
     const result = await response.json();
-    document.getElementById('loading-spinner').classList.add('hidden');
+    
+    // Ocultar el spinner DESPUÉS de recibir respuesta
+    //document.getElementById('loading-spinner').classList.add('hidden');
 
     // VALIDAR RESPUESTA EXITOSA - Los datos están en result.data
     if (response.ok && result.status === 201 && result.data) {
@@ -420,6 +438,12 @@ async function finishRegistration() {
         active: true
       };
 
+      // Avanzar al paso 4 primero (mostrará el spinner "Creando registro...")
+      document.getElementById(`step-${currentStep}`).classList.add('hidden');
+      currentStep = 4;
+      document.getElementById('step-4').classList.remove('hidden');
+      updateProgress();
+
       // Generar QR con los datos del usuario
       const qrData = JSON.stringify({
         id: currentUser.id,
@@ -428,13 +452,15 @@ async function finishRegistration() {
         timestamp: Date.now()
       });
 
-      // Generar el código QR - verificar que la librería esté cargada
-      const qrContainer = document.getElementById('qr-code');
-      qrContainer.innerHTML = ''; // Limpiar contenido previo
+      // Crear el contenedor QR temporalmente para generar la imagen
+      const tempQrContainer = document.createElement('div');
+      tempQrContainer.id = 'temp-qr-code';
+      document.body.appendChild(tempQrContainer);
 
+      // Generar el código QR
+      let qrCodeHTML = '';
       if (typeof QRCode !== 'undefined') {
-        // La librería está cargada, generar QR en canvas
-        new QRCode(qrContainer, {
+        new QRCode(tempQrContainer, {
           text: qrData,
           width: 150,
           height: 150,
@@ -442,14 +468,18 @@ async function finishRegistration() {
           colorLight: '#FFFFFF',
           correctLevel: QRCode.CorrectLevel.H
         });
+        // Esperar un momento para que el QR se genere
+        setTimeout(() => {
+          qrCodeHTML = tempQrContainer.innerHTML;
+          document.body.removeChild(tempQrContainer);
+          showSuccessScreen(qrCodeHTML, result);
+        }, 100);
       } else {
-        // Fallback: mostrar mensaje si la librería no carga
         console.error('QRCode library not loaded');
-        qrContainer.innerHTML = '<p class="text-muted">Código QR generado</p><small>ID: ' + currentUser.id + '</small>';
+        qrCodeHTML = `<p class="text-muted">Código QR generado</p><small>ID: ${currentUser.id}</small>`;
+        showSuccessScreen(qrCodeHTML, result);
       }
 
-      // Mostrar mensaje de éxito desde result.message
-      showAlert(result.message, 'success');
       clearInterval(timer);
 
     } else {
@@ -462,6 +492,29 @@ async function finishRegistration() {
     showAlert('Error de conexión con el servidor. Por favor intente nuevamente.', 'danger');
     console.error('Error completo:', error);
   }
+}
+
+function showSuccessScreen(qrCodeHTML, result) {
+  // Esperar un momento para que se vea el "Creando registro..."
+  setTimeout(() => {
+    // Ocultar step 4
+    document.getElementById('step-4').classList.add('hidden');
+    
+    // Avanzar al step 5
+    currentStep = 5;
+    document.getElementById('step-5').classList.remove('hidden');
+    updateProgress();
+    
+    // Insertar el código QR en el step 5
+    const qrContainer = document.getElementById('qr-code');
+    qrContainer.innerHTML = qrCodeHTML;
+    
+    // Mostrar alerta de éxito
+    showAlert(result.message || '¡Registro completado exitosamente!', 'success');
+    
+    // Detener el timer
+    clearInterval(timer);
+  }, 1500); // 1.5 segundos para mostrar "Creando registro..."
 }
 
 function handleApiError(result) {
