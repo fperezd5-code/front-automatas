@@ -4,29 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Autenticación - Bootstrap Theme</title>
+    <title>Sistema de Autenticación - Análisis Léxico</title>
+    
+    <!-- CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/auth.css">
 </head>
 
 <body>
-
     <div class="main-container">
         <div class="form-container">
 
             <!-- Registration Section -->
             <div class="form-section hidden" id="register-section">
                 <div class="form-header">
+                    <div class="timer" id="timer">30s</div>
                     <div class="thumbnail img">
-                        <img src="Imagen/umg.png" alt="Logo UMG">
+                        <img src="../Imagen/umg.png" alt="Logo UMG">
                     </div>
                     <h1>Registro de Usuario</h1>
                     <p class="subtitle">Complete todos los pasos para crear su cuenta</p>
@@ -84,7 +81,6 @@
                         </a>
                     </div>
 
-
                     <!-- Step 2: Notifications -->
                     <div class="register-step hidden" id="step-2">
                         <h5 class="mb-4 text-center">Preferencias de Notificación</h5>
@@ -137,45 +133,9 @@
                         </a>
                     </div>
 
-                    <!-- Step 4: Photo Editor 
-                    <div class="register-step hidden" id="step-4">
-                        <h5 class="mb-4 text-center">Personalizar Foto</h5>
-                        <div class="text-center mb-3">
-                            <canvas id="edit-canvas" width="250" height="250" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></canvas>
-                        </div>
-                        
-                        <h6 class="text-center mb-2">Filtros</h6>
-                        <div class="filter-grid">
-                            <div class="filter-btn active" data-filter="none">Original</div>
-                            <div class="filter-btn" data-filter="vintage">Vintage</div>
-                            <div class="filter-btn" data-filter="bw">B&N</div>
-                            <div class="filter-btn" data-filter="sepia">Sepia</div>
-                            <div class="filter-btn" data-filter="bright">Brillante</div>
-                        </div>
-
-                        <h6 class="text-center mb-2 mt-3">Stickers</h6>
-                        <div class="sticker-grid">
-                            <span class="sticker" onclick="addSticker('🎉')">🎉</span>
-                            <span class="sticker" onclick="addSticker('❤️')">❤️</span>
-                            <span class="sticker" onclick="addSticker('🤩')">🤩</span>
-                            <span class="sticker" onclick="addSticker('💫')">💫</span>
-                            <span class="sticker" onclick="addSticker('🥰')">🥰</span>
-                            <span class="sticker" onclick="addSticker('😎')">😎</span>
-                        </div>
-
-                        <button type="button" class="btn btn-primary" onclick="nextStep()">
-                            Finalizar Registro <i class="fas fa-check ms-2"></i>
-                        </button>
-                        <button type="button" class="btn btn-secondary mt-2" onclick="prevStep()">
-                            <i class="fas fa-arrow-left me-2"></i>Atrás
-                        </button>
-                    </div>-->
-
-
-                    <!-- Step 4: Success (Contenido dinámico) -->
+                    <!-- Step 4: Processing -->
                     <div class="register-step hidden" id="step-4">
                         <div id="step-4-content">
-                            <!-- El contenido se cargará dinámicamente desde JavaScript -->
                             <div class="text-center">
                                 <h4 class="text-primary mb-3">Procesando registro...</h4>
                                 <p class="text-muted">Por favor espere un momento</p>
@@ -213,8 +173,9 @@
             <!-- Login Section -->
             <div class="form-section" id="login-section">
                 <div class="form-header">
+                    <div class="timer" id="timer">15s</div>
                     <div class="thumbnail">
-                        <img src="Imagen/umg.png" alt="Logo UMG">
+                        <img src="../Imagen/umg.png" alt="Logo UMG">
                     </div>
                     <h1>Iniciar Sesión</h1>
                 </div>
@@ -258,7 +219,6 @@
                                 onclick="showSection('register-section'); return false;" style="text-decoration: none;">
                                 Crear usuario
                             </a>
-                            
                         </div>
 
                         <!-- Facial Login Tab -->
@@ -291,7 +251,6 @@
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -300,12 +259,31 @@
         <!-- Alerts Container -->
         <div id="alerts" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
+        <!-- Loading Spinner -->
         <div id="loading-spinner" class="hidden position-fixed top-50 start-50 translate-middle" style="z-index: 2000;">
             <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                 <span class="visually-hidden">Loading...</span>
             </div>
         </div>
     </div>
+
+    <!-- JavaScript Libraries -->
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+  <!-- Application Scripts -->
+<script src="../js/utils/api.js"></script>
+<script src="../js/utils/alerts.js"></script>
+<script src="../js/utils/storage.js"></script>
+<script src="../js/utils/helpers.js"></script>  
+<script src="../js/auth/validation.js"></script>
+<script src="../js/auth/login.js"></script>    
+<script src="../js/auth/register.js"></script>
+<script src="../js/camera/camera.js"></script>
+<script src="../js/camera/photo.js"></script>
+<script src="../js/main.js"></script>
 </body>
 
 </html>
