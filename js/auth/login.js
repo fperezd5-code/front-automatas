@@ -99,25 +99,143 @@ function handleLoginError(result) {
  */
 async function loginWithFace() {
   try {
+    // Iniciar la cámara
     const stream = await navigator.mediaDevices.getUserMedia({ 
       video: { facingMode: 'user' } 
     });
     const videoElement = document.getElementById('login-video');
-    if (videoElement) {
-      videoElement.srcObject = stream;
+    
+    if (!videoElement) {
+      showAlert('Error: elemento de video no encontrado', 'danger');
+      return;
     }
-
-    showAlert('Procesando reconocimiento facial...', 'info');
-
-    // Simular reconocimiento facial (3 segundos)
-    setTimeout(() => {
-      stream.getTracks().forEach(track => track.stop());
-      showAlert('Funcionalidad de reconocimiento facial en desarrollo', 'warning');
-    }, 3000);
-
+    
+    videoElement.srcObject = stream;
+    
+    // Mostrar instrucciones
+    showAlert('Posicione su rostro frente a la cámara', 'info');
+    
+    // Esperar 2 segundos antes de capturar
+    setTimeout(async () => {
+      try {
+        // Capturar imagen facial
+        const canvas = document.getElementById('login-canvas');
+        if (!canvas) {
+          showAlert('Error: elemento canvas no encontrado', 'danger');
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+        
+        const ctx = canvas.getContext('2d');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        ctx.drawImage(videoElement, 0, 0);
+        
+        // Obtener imagen en base64 (sin el prefijo data:image/jpeg;base64,)
+        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        const imageBase64 = imageDataUrl.split(',')[1];
+        
+        // Detener la cámara
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Mostrar loading
+        showLoading();
+        showAlert('Procesando reconocimiento facial...', 'info');
+        
+        // Llamar al endpoint de autenticación facial
+        const { response, result } = await loginWithFacialRecognition(imageBase64);
+        hideLoading();
+        
+        if (response.ok && result.status === 200) {
+          // Login exitoso
+          const userData = {
+            id: result.data.resultado,
+            usuario: result.data.mensaje.replace('Bienvenido ', '').trim(),
+            email: result.data.metodos_notificacion.find(n => n.tipo_notificacion === 'email')?.destino || '',
+            nombre_completo: result.data.mensaje.replace('Bienvenido ', '').trim(),
+            phone: result.data.metodos_notificacion.find(n => n.tipo_notificacion === 'whatsapp')?.destino || '',
+            role: 'user',
+            active: true,
+            editedPhoto: result.data.autenticacion_facial?.imagen_referencia
+              ? `data:image/jpeg;base64,${result.data.autenticacion_facial.imagen_referencia}`
+              : null,
+            notificationMethods: result.data.metodos_notificacion.map(n => n.tipo_notificacion),
+            sessionToken: result.data.session_token,
+            loginTime: new Date().toISOString()
+          };
+          
+          // Guardar sesión
+          saveUserSession(userData);
+          
+          showAlert(result.message || 'Verificación facial exitosa', 'success');
+          
+          // Redirigir después de 1 segundo
+          setTimeout(() => {
+            window.location.href = 'principal.html';
+          }, 1000);
+          
+        } else if (result.status === 404) {
+          // No se encontró coincidencia facial
+          showAlert(result.message || 'No se encontró coincidencia facial. Verifique que su rostro esté registrado.', 'danger');
+        } else {
+          handleFacialLoginError(result);
+        }
+        
+      } catch (error) {
+        hideLoading();
+        stream.getTracks().forEach(track => track.stop());
+        showAlert('Error durante el procesamiento facial: ' + error.message, 'danger');
+        console.error('Error:', error);
+      }
+    }, 2000);
+    
   } catch (err) {
     showAlert('Error accediendo a la cámara: ' + err.message, 'danger');
     console.error('Error de cámara:', err);
+  }
+}
+
+/**
+ * Maneja errores específicos del login facial
+ * @param {object} result - Resultado de la API
+ */
+function handleFacialLoginError(result) {
+  let errorMessage = result.message || 'Error en el reconocimiento facial';
+  
+  switch (result.status) {
+    case 400:
+      showAlert('Imagen no válida. Por favor intente nuevamente con mejor iluminación.', 'danger');
+      break;
+    case 404:
+      showAlert('No se encontró coincidencia facial. Verifique que esté registrado en el sistema.', 'danger');
+      break;
+    case 500:
+      showAlert('Error interno del servidor. Por favor intente más tarde.', 'danger');
+      break;
+    default:
+      showAlert(errorMessage, 'danger');
+  }
+}
+
+/**
+ * Maneja errores específicos del login facial
+ * @param {object} result - Resultado de la API
+ */
+function handleFacialLoginError(result) {
+  let errorMessage = result.message || 'Error en el reconocimiento facial';
+  
+  switch (result.status) {
+    case 400:
+      showAlert('Imagen no válida. Por favor intente nuevamente.', 'danger');
+      break;
+    case 404:
+      showAlert('No se encontró coincidencia facial. Verifique que esté registrado.', 'danger');
+      break;
+    case 500:
+      showAlert('Error interno del servidor. Por favor intente más tarde.', 'danger');
+      break;
+    default:
+      showAlert(errorMessage, 'danger');
   }
 }
 

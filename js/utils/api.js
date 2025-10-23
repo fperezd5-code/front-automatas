@@ -98,3 +98,32 @@ async function sendEmail(emailData) {
     };
   }
 }
+
+/**
+ * Realiza login con reconocimiento facial
+ * @param {string} imageBase64 - Imagen en base64 (sin prefijo data:image)
+ * @returns {Promise<{response: Response, result: object}>}
+ */
+async function loginWithFacialRecognition(imageBase64) {
+  const url = `${API_BASE_URL}/facial/verificar`;
+  
+  const requestBody = {
+    imagen_facial: imageBase64
+  };
+  
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    const result = await response.json();
+    return { response, result };
+  } catch (error) {
+    console.error('Error en login facial:', error);
+    throw error;
+  }
+}
