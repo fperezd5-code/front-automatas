@@ -1,6 +1,6 @@
 // js/utils/api.js - Manejo de llamadas a la API
 
-const API_BASE_URL = 'https://proyecto-automatas.onrender.com/api';
+const API_BASE_URL = 'https://proyecto-automatas-om2v.onrender.com/api';
 
 /**
  * Realiza una petición POST a la API
