@@ -15,79 +15,85 @@
 </head>
 
 <body>
-    <div class="main-container">
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-custom">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">
-                    <i class="fas fa-brain me-2"></i>Análisis Léxico
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" id="username-display">
-                                <i class="fas fa-user me-1"></i><span id="user-name">Usuario</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/html/index.html" onclick="logout()">
-                                <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+    <!-- Navbar Superior Fija -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-brain me-2"></i>Análisis Léxico
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="username-display">
+                            <i class="fas fa-user me-1"></i><span id="user-name">Usuario</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </nav>
+        </div>
+    </nav>
 
-        <!-- Main Content -->
+    <div class="main-container">
         <div class="content-container">
             <div class="page-header">
                 <h1><i class="fas fa-file-alt me-2"></i>Análisis Léxico de Documentos</h1>
                 <p>Cargue un archivo de texto y seleccione el idioma para iniciar el análisis</p>
             </div>
 
-            <!-- Upload Section -->
-            <div class="upload-section">
-                <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                <h4>Cargar Archivo</h4>
-                <p class="text-muted">Seleccione un archivo de texto (.txt) para analizar</p>
-                
-                <div class="file-input-wrapper">
-                    <input type="file" id="file-input" accept=".txt">
-                    <label for="file-input" class="file-input-label">
-                        <i class="fas fa-folder-open me-2"></i>Seleccionar Archivo
-                    </label>
+            <!-- Sección Principal: Upload y Language en dos columnas -->
+            <div class="row g-4 mb-4">
+                <!-- Columna Izquierda: Upload Section -->
+                <div class="col-lg-6">
+                    <div class="upload-section h-100">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h4>Cargar Archivo</h4>
+                        <p class="text-muted">Seleccione un archivo de texto (.txt) para analizar</p>
+                        
+                        <div class="file-input-wrapper">
+                            <input type="file" id="file-input" accept=".txt">
+                            <label for="file-input" class="file-input-label">
+                                <i class="fas fa-folder-open me-2"></i>Seleccionar Archivo
+                            </label>
+                        </div>
+                        
+                        <div class="file-name" id="file-name">No se ha seleccionado ningún archivo</div>
+                    </div>
                 </div>
-                
-                <div class="file-name" id="file-name">No se ha seleccionado ningún archivo</div>
-            </div>
 
-            <!-- Language Selection -->
-            <div class="language-selector">
-                <h4 class="text-center mb-4">Seleccione el Idioma del Texto</h4>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="language-option" data-lang="es" onclick="selectLanguage('es')">
-                            <i class="fas fa-flag"></i>
-                            <h5>Español</h5>
-                            <p class="mb-0 small">Latinoamérica</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="language-option" data-lang="en" onclick="selectLanguage('en')">
-                            <i class="fas fa-flag-usa"></i>
-                            <h5>Inglés</h5>
-                            <p class="mb-0 small">Estados Unidos</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="language-option" data-lang="ar" onclick="selectLanguage('ar')">
-                            <i class="fas fa-mosque"></i>
-                            <h5>Árabe</h5>
-                            <p class="mb-0 small">Egipto</p>
+                <!-- Columna Derecha: Language Selection -->
+                <div class="col-lg-6">
+                    <div class="language-selector h-100">
+                        <h4 class="text-center mb-4">Seleccione el Idioma del Texto</h4>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="language-option" data-lang="es" onclick="selectLanguage('es')">
+                                    <i class="fas fa-flag"></i>
+                                    <h5>Español</h5>
+                                    <p class="mb-0 small">Latinoamérica</p>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="language-option" data-lang="en" onclick="selectLanguage('en')">
+                                    <i class="fas fa-flag-usa"></i>
+                                    <h5>Inglés</h5>
+                                    <p class="mb-0 small">Estados Unidos</p>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="language-option" data-lang="ar" onclick="selectLanguage('ar')">
+                                    <i class="fas fa-mosque"></i>
+                                    <h5>Árabe</h5>
+                                    <p class="mb-0 small">Egipto</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

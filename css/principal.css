@@ -2,15 +2,17 @@
 
 /* Variables de colores */
 :root {
-  --primary-color: #4A90E2;
-  --secondary-color: #7B68EE;
+  --primary-color: #5DBCB1;
+  --secondary-color: #4AA9A0;
   --success-color: #5CB85C;
   --danger-color: #D9534F;
   --warning-color: #F0AD4E;
-  --info-color: #5BC0DE;
+  --info-color: #5DBCB1;
   --dark-color: #333333;
   --light-color: #F8F9FA;
   --border-color: #E0E0E0;
+  --umg-teal: #5DBCB1;
+  --umg-dark-teal: #4AA9A0;
 }
 
 /* Reset y estilos generales */
@@ -22,27 +24,40 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5DBCB1 0%, #4AA9A0 100%);
   min-height: 100vh;
   color: var(--dark-color);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 /* Contenedor principal */
 .main-container {
   min-height: 100vh;
   padding-bottom: 50px;
+  padding-top: 80px; /* Espacio para la navbar fija */
 }
 
-/* Navbar personalizado - CORREGIDO */
+/* Navbar horizontal superior */
 .navbar-custom {
-  margin: 0;
-  background: rgba(255, 255, 255, 0.95);
+  margin: 0 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 1rem 2rem;
-  position: sticky;
-  top: 0;
+  padding: 1rem 2rem !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
   z-index: 1000;
+}
+
+.navbar-custom .container-fluid {
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .navbar-brand {
@@ -71,7 +86,7 @@ body {
 }
 
 .navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(74, 144, 226, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(93, 188, 177, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
 .navbar-nav {
@@ -95,7 +110,7 @@ body {
 
 .nav-link:hover {
   color: var(--primary-color) !important;
-  background: rgba(74, 144, 226, 0.1);
+  background: rgba(93, 188, 177, 0.1);
 }
 
 .nav-link i {
@@ -137,11 +152,13 @@ body {
 .upload-section {
   background: white;
   border-radius: 15px;
-  padding: 3rem;
+  padding: 2.5rem;
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
   transition: transform 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .upload-section:hover {
@@ -181,13 +198,13 @@ body {
   cursor: pointer;
   font-weight: 500;
   transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+  box-shadow: 0 4px 15px rgba(93, 188, 177, 0.3);
 }
 
 .file-input-label:hover {
-  background: #3a7bc8;
+  background: var(--umg-dark-teal);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+  box-shadow: 0 6px 20px rgba(93, 188, 177, 0.4);
 }
 
 .file-name {
@@ -201,52 +218,57 @@ body {
 .language-selector {
   background: white;
   border-radius: 15px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 2.5rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 .language-selector h4 {
   color: var(--dark-color);
   font-weight: 600;
+  margin-bottom: 1.5rem;
 }
 
 .language-option {
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 15px;
-  padding: 2rem;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s;
   border: 3px solid transparent;
-  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .language-option:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .language-option.selected {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--umg-dark-teal) 100%);
   color: white;
   border-color: white;
 }
 
 .language-option i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  display: block;
+  font-size: 2.5rem;
 }
 
 .language-option h5 {
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin: 0;
+  font-size: 1.1rem;
 }
 
 .language-option p {
   opacity: 0.8;
   margin: 0;
+  font-size: 0.85rem;
 }
 
 .language-option.selected h5,
@@ -265,16 +287,16 @@ body {
   font-weight: 600;
   border: none;
   border-radius: 50px;
-  background: linear-gradient(135deg, var(--success-color) 0%, #4cae4c 100%);
+  background: linear-gradient(135deg, var(--umg-teal) 0%, var(--umg-dark-teal) 100%);
   color: white;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 5px 20px rgba(92, 184, 92, 0.4);
+  box-shadow: 0 5px 20px rgba(93, 188, 177, 0.4);
 }
 
 .btn-process:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(92, 184, 92, 0.5);
+  box-shadow: 0 8px 25px rgba(93, 188, 177, 0.5);
 }
 
 .btn-process:disabled {
@@ -466,8 +488,12 @@ body {
 
 /* Responsive */
 @media (max-width: 992px) {
+  .main-container {
+    padding-top: 70px;
+  }
+
   .navbar-custom {
-    padding: 1rem;
+    padding: 0.75rem 1rem !important;
   }
 
   .navbar-collapse {
@@ -486,9 +512,27 @@ body {
   .nav-link {
     padding: 0.75rem 1rem;
   }
+
+  /* En pantallas medianas, las columnas se apilan */
+  .upload-section,
+  .language-selector {
+    margin-bottom: 1.5rem;
+  }
+
+  .language-option {
+    padding: 1rem;
+  }
+
+  .language-option i {
+    font-size: 2rem;
+  }
 }
 
 @media (max-width: 768px) {
+  .main-container {
+    padding-top: 70px;
+  }
+
   .page-header h1 {
     font-size: 2rem;
   }
@@ -497,9 +541,14 @@ body {
     padding: 2rem 1rem;
   }
 
+  .language-selector {
+    padding: 2rem 1rem;
+  }
+
   .language-option {
+    flex-direction: column;
+    gap: 0.5rem;
     padding: 1.5rem 1rem;
-    margin-bottom: 1rem;
   }
 
   .language-option i {
@@ -521,6 +570,10 @@ body {
 }
 
 @media (max-width: 576px) {
+  .main-container {
+    padding-top: 60px;
+  }
+
   .page-header h1 {
     font-size: 1.75rem;
   }
@@ -555,6 +608,10 @@ body {
     align-items: flex-start;
     gap: 0.5rem;
   }
+
+  .language-option {
+    padding: 1.25rem 1rem;
+  }
 }
 
 /* Animaciones */
@@ -586,7 +643,7 @@ body {
 html {
   scroll-behavior: smooth;
 }
-
+/*vamo a ver jeje*/
 /* Mejoras de accesibilidad */
 .btn-process:focus,
 .file-input-label:focus,
