@@ -477,23 +477,3 @@ function escapeHtml(text) {
   div.textContent = text;
   return div.innerHTML;
 }
-
-const fileInput = document.getElementById('fileInput');
-const containerA = document.getElementById('containerA');
-const containerB = document.getElementById('containerB');
-
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return console.log('No file selected');
-    const reader = new FileReader();
-    reader.onload = () => {
-        const text = reader.result;
-        console.log('File content:', text); // verifica que llegue el texto
-        // ejemplo de parseo simple: separar por líneas y llenar contenedores
-        const lines = text.split(/\r?\n/);
-        containerA.textContent = lines[0] || '';
-        containerB.textContent = lines.slice(1).join('\n') || '';
-    };
-    reader.onerror = (err) => console.error('FileReader error', err);
-    reader.readAsText(file, 'UTF-8');
-});
