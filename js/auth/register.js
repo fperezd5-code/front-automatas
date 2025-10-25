@@ -591,7 +591,7 @@ function downloadCredential() {
 }
 
 /**
- * Añade un fallback visual cuando no hay QR canvas
+ * Añade un fallback visual cuando no hay QR canvas -
  * @param {jsPDF} doc - Documento PDF
  */
 function addQRFallback(doc) {
