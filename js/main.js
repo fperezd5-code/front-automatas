@@ -251,10 +251,36 @@ function processFile() {
 }
 
 /**
+ * Cierra la sesión del usuario
+ */
+function logout() {
+  if (confirm('¿Está seguro que desea cerrar sesión?')) {
+    // Limpiar sesión
+    if (typeof clearUserSession === 'function') {
+      clearUserSession();
+    } else {
+      // Si la función no existe, limpiar manualmente
+      localStorage.removeItem('userSession');
+      sessionStorage.removeItem('userSession');
+    }
+    
+    // Mostrar mensaje
+    showAlert('Sesión cerrada exitosamente', 'success');
+    
+    // Redirigir al login
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 500);
+  }
+}
+
+/**
  * Limpia el formulario cuando se cierra sesión
  */
 window.addEventListener('beforeunload', function () {
-  stopAllCameraStreams();
+  if (typeof stopAllCameraStreams === 'function') {
+    stopAllCameraStreams();
+  }
   if (timer) {
     clearInterval(timer);
   }

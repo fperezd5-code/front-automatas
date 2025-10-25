@@ -250,4 +250,97 @@
   .thumbnail img {
     max-width: 250px;
   }
+  /* Estilos para el escáner QR */
+#qr-video-container {
+    position: relative;
+    border: 2px solid #007bff;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    min-height: 300px;
+}
+
+#qr-video-container video {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 10px;
+}
+
+/* Ocultar controles innecesarios de html5-qrcode */
+#qr-video-container #qr-shaded-region {
+    border: 3px solid rgba(0, 255, 0, 0.5) !important;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3) !important;
+}
+
+#qr-video-container #qr-shaded-region canvas {
+    display: none !important;
+}
+
+/* Botón de detener QR */
+#stop-qr-btn {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Mejoras visuales para el área de escaneo */
+.camera-section {
+    position: relative;
+}
+
+.qr-scan-animation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    border: 2px dashed rgba(0, 255, 0, 0.5);
+    border-radius: 10px;
+    animation: qr-pulse 2s infinite;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes qr-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+}
+
+/* Indicador de escaneo activo */
+.qr-scanning-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 255, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    animation: blink 1s infinite;
+    z-index: 20;
+}
+
+@keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0.5; }
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    #qr-video-container {
+        max-width: 100%;
+    }
+    
+    .qr-scan-animation {
+        width: 150px;
+        height: 150px;
+    }
+}
 }

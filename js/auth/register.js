@@ -1,4 +1,4 @@
-// js/auth/register.js - Lógica de registro de usuarios
+// js/auth/register.js - VERSIÓN COMPLETA CON ESPERA DE QRCode
 
 let currentStep = 1;
 let selectedNotificationMethods = [];
@@ -83,6 +83,8 @@ function setupNotificationListeners() {
  * Finaliza el proceso de registro
  */
 async function finishRegistration() {
+  console.log('📝 ============== INICIO REGISTRO ==============');
+  
   const email = document.getElementById('email').value;
   const phone = document.getElementById('phone').value;
   const nickname = document.getElementById('nickname').value;
@@ -116,11 +118,20 @@ async function finishRegistration() {
     imagen_referencia: imageBase64
   };
 
+  console.log('📤 Enviando al backend:', {
+    ...requestBody,
+    imagen_referencia: imageBase64.substring(0, 50) + '...'
+  });
+
   try {
     const { response, result } = await registerUser(requestBody);
 
+    console.log('📥 Respuesta del backend:', result);
+
     if (response.ok && result.status === 201 && result.data) {
-      // Registro exitoso
+      console.log('✅ Registro exitoso en backend');
+      
+      // Registro exitoso - Guardar datos del usuario
       currentUser = {
         id: result.data.id,
         usuario: result.data.usuario,
@@ -133,80 +144,285 @@ async function finishRegistration() {
         notificaciones: result.data.notificaciones,
         role: 'analyst',
         createdAt: new Date().toISOString(),
-        active: true
+        active: true,
+        qr_token: result.data.qr_token || generateQRToken(),
       };
 
-      // Avanzar al paso 4
+      console.log('💾 currentUser guardado:', currentUser);
+
+      // Avanzar al paso 4 (procesando)
       document.getElementById(`step-${currentStep}`).classList.add('hidden');
       currentStep = 4;
       document.getElementById('step-4').classList.remove('hidden');
       updateProgress();
 
-      // Generar QR
-      const qrData = {
-        id: currentUser.id,
-        usuario: currentUser.usuario,
-        email: currentUser.email,
-        timestamp: Date.now()
-      };
+      console.log('⏱️ Esperando 1.5 segundos antes de generar QR...');
 
-      // Crear contenedor temporal para QR
-      const tempQrContainer = document.createElement('div');
-      tempQrContainer.id = 'temp-qr-code';
-      document.body.appendChild(tempQrContainer);
-
-      let qrCodeHTML = '';
-      if (typeof QRCode !== 'undefined') {
-        new QRCode(tempQrContainer, {
-          text: JSON.stringify(qrData),
-          width: 150,
-          height: 150,
-          colorDark: '#333333',
-          colorLight: '#FFFFFF',
-          correctLevel: QRCode.CorrectLevel.H
-        });
-        
-        setTimeout(() => {
-          qrCodeHTML = tempQrContainer.innerHTML;
-          document.body.removeChild(tempQrContainer);
-          showSuccessScreen(qrCodeHTML, result);
-        }, 100);
-      } else {
-        console.error('QRCode library not loaded');
-        qrCodeHTML = `<p class="text-muted">Código QR generado</p><small>ID: ${currentUser.id}</small>`;
-        showSuccessScreen(qrCodeHTML, result);
-      }
+      // Generar y mostrar QR después de un momento
+      setTimeout(() => {
+        console.log('🚀 Llamando a generateAndShowQR()...');
+        generateAndShowQR(result);
+      }, 1500);
 
     } else {
+      console.error('❌ Error en registro:', result);
       handleApiError(result);
     }
 
   } catch (error) {
+    console.error('❌ Error fatal en registro:', error);
     showAlert('Error de conexión con el servidor. Por favor intente nuevamente.', 'danger');
-    console.error('Error completo:', error);
+  }
+  
+  console.log('📝 ============== FIN REGISTRO ==============');
+}
+
+// ==========================================
+// ✅ FUNCIONES DE GENERACIÓN DE QR - MEJORADAS
+// ==========================================
+
+/**
+ * ✅ VERSIÓN MEJORADA - Genera y muestra el código QR
+ * Espera automáticamente a que la librería QRCode esté disponible
+ * IMPORTANTE: Genera QR con SOLO el token (no JSON) para compatibilidad con login
+ * @param {object} result - Resultado de la API
+ */
+async function generateAndShowQR(result) {
+  console.log('');
+  console.log('🔐 ============== GENERACIÓN QR START ==============');
+  console.log('📊 [1/12] Verificando currentUser:', currentUser);
+  
+  if (!currentUser) {
+    console.error('❌ currentUser es null!');
+    showAlert('Error: Datos de usuario no disponibles', 'danger');
+    return;
+  }
+  
+  if (!currentUser.qr_token) {
+    console.error('❌ qr_token no está disponible!');
+    showAlert('Error: Token QR no generado por el servidor', 'danger');
+    return;
+  }
+  
+  // ✅ IMPORTANTE: El QR contiene SOLO el token (string simple)
+  // NO se incluye usuario_id, email ni ningún dato sensible en el QR
+  // El backend validará el token y obtendrá los datos del usuario
+  const qrDataString = currentUser.qr_token;
+  
+  console.log('📦 [2/12] Token QR para codificar:', qrDataString.substring(0, 30) + '...');
+  console.log('🔒 [2.5/12] SEGURIDAD: QR contiene SOLO el token, sin datos del usuario');
+
+  // Pasar al Step 5
+  console.log('🔄 [3/12] Ocultando step-4...');
+  document.getElementById('step-4').classList.add('hidden');
+  
+  currentStep = 5;
+  console.log('🔄 [4/12] Mostrando step-5...');
+  document.getElementById('step-5').classList.remove('hidden');
+  
+  updateProgress();
+  console.log('✅ [5/12] Avanzado a step 5 correctamente');
+
+  // Obtener contenedor del QR
+  console.log('🔍 [6/12] Buscando contenedor #qr-code...');
+  const qrContainer = document.getElementById('qr-code');
+  
+  if (!qrContainer) {
+    console.error('❌ ERROR CRÍTICO: Contenedor #qr-code NO ENCONTRADO en el DOM!');
+    console.log('🔍 Elementos disponibles con id que contienen "qr":');
+    document.querySelectorAll('[id*="qr"]').forEach(el => {
+      console.log('   -', el.id, el.tagName);
+    });
+    showAlert('Error: Contenedor QR no encontrado en la página', 'danger');
+    return;
+  }
+
+  console.log('✅ [7/12] Contenedor encontrado:', qrContainer);
+  console.log('   - Tipo:', qrContainer.tagName);
+  console.log('   - Clases:', qrContainer.className);
+  console.log('   - Dimensiones:', qrContainer.offsetWidth, 'x', qrContainer.offsetHeight);
+  console.log('   - Visible:', qrContainer.offsetParent !== null);
+
+  // Limpiar contenedor
+  console.log('🧹 [8/12] Limpiando contenedor...');
+  qrContainer.innerHTML = '';
+  console.log('✅ Contenedor limpiado');
+
+  // ✅ NUEVO: ESPERAR a que QRCode esté disponible
+  console.log('⏳ [9/12] Esperando a que QRCode esté disponible...');
+  const qrCodeReady = await waitForQRCode(100, 50); // 100 intentos x 50ms = 5 segundos
+  
+  if (!qrCodeReady) {
+    console.error('❌ [10/12] QRCode NO se cargó después de esperar');
+    showQRCodeLoadError(qrContainer);
+    return;
+  }
+  
+  console.log('✅ [10/12] QRCode está disponible y listo');
+
+  // Generar QR
+  console.log('🎨 [11/12] Generando QR visual...');
+  
+  try {
+    console.log('   - Token para QR:', qrDataString.substring(0, 20) + '...');
+    console.log('   - Longitud token:', qrDataString.length);
+    console.log('🔨 Creando instancia de QRCode...');
+    
+    new QRCode(qrContainer, {
+      text: qrDataString, // SOLO el token
+      width: 200,
+      height: 200,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    console.log('✅ [12/12] Instancia QRCode creada!');
+    
+    // Verificar que el canvas se creó
+    setTimeout(() => {
+      const canvas = qrContainer.querySelector('canvas');
+      const img = qrContainer.querySelector('img');
+      
+      console.log('🔍 Verificando resultado...');
+      console.log('   - Canvas encontrado:', !!canvas);
+      console.log('   - Img encontrado:', !!img);
+      
+      if (canvas || img) {
+        console.log('✅ ¡QR GENERADO EXITOSAMENTE!');
+        if (canvas) {
+          console.log('   - Canvas dimensiones:', canvas.width, 'x', canvas.height);
+        }
+        showAlert(result.message || '✅ ¡Registro completado! Código QR generado', 'success');
+      } else {
+        console.error('❌ No se generó el QR visual');
+        showQRCodeGenerationError(qrContainer);
+      }
+      
+      console.log('🔐 ============== GENERACIÓN QR END ==============');
+      console.log('');
+    }, 500);
+    
+  } catch (error) {
+    console.error('❌ ERROR AL GENERAR QR:', error);
+    console.error('   - Nombre:', error.name);
+    console.error('   - Mensaje:', error.message);
+    console.error('   - Stack:', error.stack);
+    
+    showQRCodeGenerationError(qrContainer, error.message);
   }
 }
 
 /**
- * Muestra la pantalla de éxito
- * @param {string} qrCodeHTML - HTML del código QR
- * @param {object} result - Resultado de la API
+ * ✅ NUEVA FUNCIÓN: Espera a que QRCode esté disponible
+ * @param {number} maxAttempts - Número máximo de intentos
+ * @param {number} interval - Intervalo entre intentos (ms)
+ * @returns {Promise<boolean>}
  */
-function showSuccessScreen(qrCodeHTML, result) {
-  setTimeout(() => {
-    document.getElementById('step-4').classList.add('hidden');
-    currentStep = 5;
-    document.getElementById('step-5').classList.remove('hidden');
-    updateProgress();
+function waitForQRCode(maxAttempts = 100, interval = 50) {
+  return new Promise((resolve) => {
+    let attempts = 0;
     
-    const qrContainer = document.getElementById('qr-code');
-    if (qrContainer) {
-      qrContainer.innerHTML = qrCodeHTML;
-    }
+    console.log(`⏳ Iniciando espera de QRCode (max ${maxAttempts} intentos de ${interval}ms)...`);
     
-    showAlert(result.message || '¡Registro completado exitosamente!', 'success');
-  }, 1500);
+    const checkQRCode = setInterval(() => {
+      attempts++;
+      
+      if (typeof QRCode !== 'undefined') {
+        console.log(`✅ QRCode cargado después de ${attempts} intentos (${attempts * interval}ms)`);
+        clearInterval(checkQRCode);
+        resolve(true);
+      } else if (attempts >= maxAttempts) {
+        console.error(`❌ QRCode no se cargó después de ${maxAttempts} intentos (${maxAttempts * interval}ms)`);
+        clearInterval(checkQRCode);
+        resolve(false);
+      } else if (attempts % 10 === 0) {
+        console.log(`⏳ Esperando... intento ${attempts}/${maxAttempts}`);
+      }
+    }, interval);
+  });
 }
+
+/**
+ * ✅ NUEVA FUNCIÓN: Muestra error cuando QRCode no se carga
+ * @param {HTMLElement} container - Contenedor del QR
+ */
+function showQRCodeLoadError(container) {
+  console.error('🚨 Mostrando error de carga de QRCode');
+  
+  container.innerHTML = `
+    <div class="text-center p-4 border border-danger rounded bg-danger bg-opacity-10">
+      <i class="fas fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+      <h5 class="text-danger mb-2">Error: Librería QRCode no disponible</h5>
+      <p class="text-muted mb-3">
+        La librería necesaria para generar el código QR no se cargó correctamente.
+      </p>
+      <div class="alert alert-info small text-start">
+        <strong>Posibles soluciones:</strong>
+        <ul class="mb-0 mt-2">
+          <li>Recarga la página (F5)</li>
+          <li>Verifica tu conexión a internet</li>
+          <li>Limpia la caché del navegador</li>
+        </ul>
+      </div>
+      <button class="btn btn-primary mt-2" onclick="location.reload()">
+        <i class="fas fa-sync"></i> Recargar Página
+      </button>
+      ${currentUser ? `<p class="mt-3 small text-muted">ID Usuario: ${currentUser.id}</p>` : ''}
+    </div>
+  `;
+  
+  showAlert('⚠️ No se pudo cargar la librería QRCode. Recargue la página.', 'danger');
+}
+
+/**
+ * ✅ NUEVA FUNCIÓN: Muestra error cuando falla la generación del QR
+ * @param {HTMLElement} container - Contenedor del QR
+ * @param {string} errorMsg - Mensaje de error
+ */
+function showQRCodeGenerationError(container, errorMsg = '') {
+  console.error('🚨 Mostrando error de generación de QR');
+  
+  container.innerHTML = `
+    <div class="text-center p-4 border border-warning rounded bg-warning bg-opacity-10">
+      <i class="fas fa-qrcode fa-4x text-warning mb-3"></i>
+      <h5 class="text-warning mb-2">Error al generar código QR</h5>
+      <p class="text-muted mb-2">
+        El código no pudo generarse correctamente.
+      </p>
+      ${errorMsg ? `<p class="small text-danger">${errorMsg}</p>` : ''}
+      <div class="alert alert-light small text-start mt-3">
+        <strong>Información de respaldo:</strong><br>
+        ${currentUser ? `
+          ID: ${currentUser.id}<br>
+          Usuario: ${currentUser.usuario}<br>
+          Token: ${(currentUser.qr_token || 'N/A').substring(0, 30)}...
+        ` : 'No disponible'}
+      </div>
+      <button class="btn btn-warning mt-2" onclick="location.reload()">
+        <i class="fas fa-redo"></i> Intentar Nuevamente
+      </button>
+    </div>
+  `;
+  
+  showAlert('⚠️ Error al generar el código QR: ' + (errorMsg || 'Desconocido'), 'warning');
+}
+
+/**
+ * Genera un token único para el QR
+ * @returns {string} - Token generado
+ */
+function generateQRToken() {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 15);
+  const token = `qr_${timestamp}_${random}`;
+  console.log('🎲 Token QR generado:', token);
+  return token;
+}
+
+// ==========================================
+// MANEJO DE ERRORES
+// ==========================================
 
 /**
  * Maneja errores de la API durante el registro
@@ -282,23 +498,37 @@ function goToStep(step, fieldId = null) {
   }
 }
 
+// ==========================================
+// GENERACIÓN DE PDF
+// ==========================================
+
 /**
- * Descarga la credencial del usuario
+ * Descarga la credencial del usuario con QR
  */
 function downloadCredential() {
+  console.log('📄 ============== DESCARGA PDF START ==============');
+  
   if (!currentUser) {
+    console.error('❌ No hay currentUser para generar PDF');
     showAlert('No hay información de usuario para generar la credencial', 'warning');
     return;
   }
 
+  console.log('👤 Usuario para PDF:', currentUser);
+
   // Verificar si jsPDF está disponible
   if (typeof window.jspdf === 'undefined') {
-    showAlert('Error: Librería jsPDF no cargada', 'danger');
+    console.error('❌ jsPDF no está disponible');
+    showAlert('❌ Error: Librería jsPDF no cargada. Recargue la página.', 'danger');
     return;
   }
 
+  console.log('✅ jsPDF disponible');
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+
+  console.log('📝 Creando estructura del PDF...');
 
   // Fondo
   doc.setFillColor(255, 217, 102);
@@ -322,8 +552,9 @@ function downloadCredential() {
   if (currentUser.editedPhoto) {
     try {
       doc.addImage(currentUser.editedPhoto, 'JPEG', 17, 57, 56, 56);
+      console.log('✅ Foto añadida');
     } catch (error) {
-      console.error('Error añadiendo imagen:', error);
+      console.error('❌ Error añadiendo foto:', error);
     }
   }
 
@@ -331,7 +562,7 @@ function downloadCredential() {
   doc.setLineWidth(2);
   doc.roundedRect(15, 55, 60, 60, 3, 3, 'S');
 
-  // Información
+  // Información del usuario
   const infoY = 55;
   
   doc.setFillColor(255, 182, 193);
@@ -359,18 +590,42 @@ function downloadCredential() {
   doc.setFont(undefined, 'normal');
   doc.text(currentUser.phone, 120, infoY + 50);
 
+  doc.setFillColor(255, 255, 204);
+  doc.roundedRect(85, infoY + 60, 110, 15, 2, 2, 'F');
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('ID:', 88, infoY + 70);
+  doc.setFont(undefined, 'normal');
+  doc.text(String(currentUser.id), 102, infoY + 70);
+
+  console.log('✅ Información de usuario añadida');
+
   // QR Code
+  console.log('🔍 Buscando canvas del QR para PDF...');
+  
   doc.setFillColor(255, 255, 255);
   doc.roundedRect(70, 135, 70, 70, 3, 3, 'F');
 
-  const qrCanvas = document.getElementById('qr-code').querySelector('canvas');
+  const qrContainer = document.getElementById('qr-code');
+  console.log('   - Contenedor encontrado:', !!qrContainer);
+  
+  const qrCanvas = qrContainer ? qrContainer.querySelector('canvas') : null;
+  console.log('   - Canvas encontrado:', !!qrCanvas);
+  
   if (qrCanvas) {
     try {
-      const qrDataURL = qrCanvas.toDataURL();
+      console.log('   - Dimensiones canvas:', qrCanvas.width, 'x', qrCanvas.height);
+      const qrDataURL = qrCanvas.toDataURL('image/png');
+      console.log('   - Data URL generado:', qrDataURL.substring(0, 50) + '...');
       doc.addImage(qrDataURL, 'PNG', 75, 140, 60, 60);
+      console.log('✅ QR añadido al PDF exitosamente');
     } catch (error) {
-      console.error('Error añadiendo QR:', error);
+      console.error('❌ Error añadiendo QR al PDF:', error);
+      addQRFallback(doc);
     }
+  } else {
+    console.warn('⚠️ Canvas del QR no encontrado, usando fallback');
+    addQRFallback(doc);
   }
 
   doc.setLineWidth(3);
@@ -379,7 +634,11 @@ function downloadCredential() {
 
   doc.setFontSize(10);
   doc.setFont(undefined, 'bold');
-  doc.text('CÓDIGO DE ACCESO', 105, 213, { align: 'center' });
+  doc.setTextColor(0, 0, 0);
+  doc.text('CÓDIGO DE ACCESO QR', 105, 213, { align: 'center' });
+  doc.setFontSize(8);
+  doc.setFont(undefined, 'normal');
+  doc.text('Escanee para iniciar sesión', 105, 219, { align: 'center' });
 
   // Footer
   doc.setFillColor(93, 193, 185);
@@ -393,6 +652,30 @@ function downloadCredential() {
   doc.text('Sistema de Análisis Léxico © 2025', 105, 292, { align: 'center' });
 
   // Guardar PDF
-  doc.save(`credencial_${currentUser.usuario}.pdf`);
-  showAlert('Credencial descargada exitosamente', 'success');
+  const filename = `credencial_${currentUser.usuario}_${Date.now()}.pdf`;
+  console.log('💾 Guardando PDF:', filename);
+  doc.save(filename);
+  showAlert('✅ Credencial descargada exitosamente', 'success');
+  console.log('📄 ============== DESCARGA PDF END ==============');
+}
+
+/**
+ * Añade un fallback visual cuando no hay QR canvas
+ * @param {jsPDF} doc - Documento PDF
+ */
+function addQRFallback(doc) {
+  console.log('🔄 Añadiendo fallback de QR al PDF...');
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text('QR de acceso', 105, 165, { align: 'center' });
+  doc.setFontSize(8);
+  doc.text(`ID: ${currentUser.id}`, 105, 172, { align: 'center' });
+  
+  const tokenPreview = (currentUser.qr_token || 'N/A').substring(0, 20);
+  doc.text('Token: ' + tokenPreview + '...', 105, 178, { align: 'center' });
+  
+  doc.setFontSize(7);
+  doc.setTextColor(150, 150, 150);
+  doc.text('Use la versión digital del QR', 105, 185, { align: 'center' });
+  console.log('✅ Fallback añadido');
 }

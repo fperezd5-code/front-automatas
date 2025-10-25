@@ -239,15 +239,31 @@
                         <!-- QR Login Tab -->
                         <div class="tab-pane fade" id="qr-tab" role="tabpanel">
                             <div class="camera-section">
-                                <video id="qr-video" class="camera-video" autoplay playsinline></video>
-                                <canvas id="qr-canvas" class="hidden"></canvas>
+                                <!-- Contenedor para el escáner QR -->
+                                <div id="qr-video-container" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+                                
                                 <p class="text-muted mt-3 mb-4 text-center">
                                     <i class="fas fa-info-circle me-2"></i>
                                     Escanee su código QR personal
                                 </p>
+                                
+                                <div class="alert alert-info" style="font-size: 12px;">
+                                    <strong>💡 Instrucciones:</strong>
+                                    <ul class="mb-0 mt-2" style="font-size: 11px;">
+                                        <li>Use su credencial con el código QR</li>
+                                        <li>Enfoque el QR dentro del área marcada</li>
+                                        <li>Mantenga buena iluminación</li>
+                                        <li>El acceso será automático al detectarlo</li>
+                                    </ul>
+                                </div>
                             </div>
+                            
                             <button type="button" class="btn btn-primary" onclick="loginWithQR()">
-                                <i class="fas fa-camera me-2"></i>Escanear Código QR
+                                <i class="fas fa-qrcode me-2"></i>Iniciar Escáner QR
+                            </button>
+                            
+                            <button type="button" class="btn btn-secondary mt-2" id="stop-qr-btn" style="display: none;" onclick="stopQRScanner()">
+                                <i class="fas fa-stop me-2"></i>Detener Escáner
                             </button>
                         </div>
                     </div>
@@ -267,22 +283,36 @@
         </div>
     </div>
 
-<!-- JavaScript Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <!-- Application Scripts -->
-    <script src="../js/utils/api.js"></script>
-    <script src="../js/utils/alerts.js"></script>
-    <script src="../js/utils/storage.js"></script>
-    <script src="../js/utils/helpers.js"></script>  
-    <script src="../js/auth/validation.js"></script>
-    <script src="../js/auth/login.js"></script>    
-    <script src="../js/auth/register.js"></script>
-    <script src="../js/camera/camera.js"></script>
-    <script src="../js/camera/photo.js"></script>
-    <script src="../js/main.js"></script>
+<!-- ============================================ -->
+<!-- ✅ JAVASCRIPT LIBRARIES - ORDEN CORRECTO -->
+<!-- ============================================ -->
+
+<!-- Bootstrap -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+<!-- ✅ QRCode.js - GENERADOR DE QR (para registro) - CORREGIDO -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!-- jsPDF - Generación de PDFs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Html5-QRCode - ESCÁNER DE QR (para login) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+<!-- ============================================ -->
+<!-- APPLICATION SCRIPTS -->
+<!-- ============================================ -->
+<script src="../js/utils/api.js"></script>
+<script src="../js/utils/alerts.js"></script>
+<script src="../js/utils/storage.js"></script>
+<script src="../js/utils/helpers.js"></script>  
+<script src="../js/auth/validation.js"></script>
+<script src="../js/auth/login.js"></script>    
+<script src="../js/auth/register.js"></script>
+<script src="../js/camera/camera.js"></script>
+<script src="../js/camera/photo.js"></script>
+<script src="../js/main.js"></script>
+
 </body>
 
 </html>
