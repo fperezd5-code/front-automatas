@@ -111,6 +111,9 @@ async function loginWithFacialRecognition(imageBase64) {
     imagen_facial: imageBase64
   };
   
+  console.log('📤 Login facial - Enviando a:', url);
+  console.log('📦 Tamaño imagen:', imageBase64.length, 'caracteres');
+  
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -121,9 +124,49 @@ async function loginWithFacialRecognition(imageBase64) {
     });
     
     const result = await response.json();
+    
+    console.log('📥 Login facial - Status:', response.status);
+    console.log('📥 Login facial - Respuesta:', result);
+    
     return { response, result };
   } catch (error) {
-    console.error('Error en login facial:', error);
+    console.error('❌ Error en loginWithFacialRecognition:', error);
+    throw error;
+  }
+}
+
+/**
+ * 🆕 Realiza login con código QR (SIMPLIFICADO Y SEGURO)
+ * @param {string} qrToken - Token del QR (string simple, NO JSON)
+ * @returns {Promise<{response: Response, result: object}>}
+ */
+async function loginWithQRCode(qrToken) {
+  const url = `${API_BASE_URL}/usuarios/login-qr`;
+  
+  const requestBody = {
+    qr_token: qrToken  // Solo el token, nada más
+  };
+  
+  console.log('📤 Login QR - Enviando a:', url);
+  console.log('📦 Token QR:', qrToken.substring(0, 20) + '...');
+  
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    const result = await response.json();
+    
+    console.log('📥 Login QR - Status:', response.status);
+    console.log('📥 Login QR - Respuesta:', result);
+    
+    return { response, result };
+  } catch (error) {
+    console.error('❌ Error en loginWithQRCode:', error);
     throw error;
   }
 }
