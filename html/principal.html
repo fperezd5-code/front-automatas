@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Léxico - Sistema de Autenticación</title>
+    
+    <!-- CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../css/principal.css">
+</head>
+
+<body>
+    <!-- Navbar Superior Fija -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-brain me-2"></i>Análisis Léxico
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="username-display">
+                            <i class="fas fa-user me-1"></i><span id="user-name">Usuario</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0);" onclick="logout(); return false;">
+                            <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="content-container">
+            <div class="page-header">
+                <h1><i class="fas fa-file-alt me-2"></i>Análisis Léxico de Documentos</h1>
+                <p>Cargue un archivo de texto y seleccione el idioma para iniciar el análisis</p>
+            </div>
+
+            <!-- Sección Principal: Upload y Language en dos columnas -->
+            <div class="row g-4 mb-4">
+                <!-- Columna Izquierda: Upload Section -->
+                <div class="col-lg-6">
+                    <div class="upload-section h-100">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h4>Cargar Archivo</h4>
+                        <p class="text-muted">Seleccione un archivo de texto (.txt) para analizar</p>
+                        
+                        <div class="file-input-wrapper">
+                            <input type="file" id="file-input" accept=".txt">
+                            <label for="file-input" class="file-input-label">
+                                <i class="fas fa-folder-open me-2"></i>Seleccionar Archivo
+                            </label>
+                        </div>
+                        
+                        <div class="file-name" id="file-name">No se ha seleccionado ningún archivo</div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Language Selection -->
+                <div class="col-lg-6">
+                    <div class="language-selector h-100">
+                        <h4 class="text-center mb-4">Seleccione el Idioma del Texto</h4>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="language-option" data-lang="es" onclick="selectLanguage('es')">
+                                    <i class="fas fa-flag"></i>
+                                    <h5>Español</h5>
+                                    <p class="mb-0 small">Latinoamérica</p>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="language-option" data-lang="en" onclick="selectLanguage('en')">
+                                    <i class="fas fa-flag-usa"></i>
+                                    <h5>Inglés</h5>
+                                    <p class="mb-0 small">Estados Unidos</p>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="language-option" data-lang="ar" onclick="selectLanguage('ar')">
+                                    <i class="fas fa-mosque"></i>
+                                    <h5>Árabe</h5>
+                                    <p class="mb-0 small">Egipto</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Button -->
+            <button class="btn-process" id="process-btn" onclick="processFile()" disabled>
+                <i class="fas fa-cogs me-2"></i>Procesar Documento
+            </button>
+
+            <!-- Results Section -->
+            <div class="results-section hidden" id="results-section">
+                <h3 class="text-center mb-4 results-title">
+                    <i class="fas fa-chart-bar me-2"></i>Resultados del Análisis
+                </h3>
+
+                <!-- Statistics Card -->
+                <div class="result-card">
+                    <h4><i class="fas fa-chart-line me-2"></i>Estadísticas Generales</h4>
+                    <div class="result-item">
+                        <span class="label">Total de palabras:</span>
+                        <span class="value" id="total-words">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Palabras únicas:</span>
+                        <span class="value" id="unique-words">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Total de caracteres:</span>
+                        <span class="value" id="total-chars">0</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Total de líneas:</span>
+                        <span class="value" id="total-lines">0</span>
+                    </div>
+                </div>
+
+                <!-- Most Frequent Words -->
+                <div class="result-card">
+                    <h4><i class="fas fa-arrow-up me-2"></i>Palabras Más Frecuentes</h4>
+                    <div id="most-frequent"></div>
+                </div>
+
+                <!-- Least Frequent Words -->
+                <div class="result-card">
+                    <h4><i class="fas fa-arrow-down me-2"></i>Palabras Menos Frecuentes</h4>
+                    <div id="least-frequent"></div>
+                </div>
+
+                <!-- Personal Pronouns -->
+                <div class="result-card">
+                    <h4><i class="fas fa-user-tag me-2"></i>Pronombres Personales</h4>
+                    <div class="word-list" id="pronouns"></div>
+                </div>
+
+                <!-- Person Names -->
+                <div class="result-card">
+                    <h4><i class="fas fa-id-card me-2"></i>Nombres de Personas</h4>
+                    <div class="word-list" id="person-names"></div>
+                </div>
+
+                <!-- Nouns -->
+                <div class="result-card">
+                    <h4><i class="fas fa-cube me-2"></i>Sustantivos (Forma Raíz)</h4>
+                    <div class="word-list" id="nouns"></div>
+                </div>
+
+                <!-- Verbs -->
+                <div class="result-card">
+                    <h4><i class="fas fa-running me-2"></i>Verbos (Forma Raíz)</h4>
+                    <div class="word-list" id="verbs"></div>
+                </div>
+
+                <!-- Additional Classifications -->
+                <div class="result-card">
+                    <h4><i class="fas fa-tags me-2"></i>Clasificaciones Adicionales</h4>
+                    <div id="additional-classifications"></div>
+                </div>
+
+                <!-- Download Buttons -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary me-2" onclick="downloadResultsWrapper()">
+                        <i class="fas fa-download me-2"></i>Descargar TXT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <h4 class="loading-title mt-3 text-white">Procesando documento...</h4>
+            <p class="text-white-50">Por favor espere</p>
+        </div>
+    </div>
+
+    <!-- Alerts Container -->
+    <div id="alerts" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Utilidades -->
+    <script src="../js/utils/helpers.js"></script>
+    <script src="../js/utils/storage.js"></script>
+    <script src="../js/utils/alerts.js"></script>
+    <script src="../js/utils/api.js"></script>
+    
+    <!-- Análisis Léxico -->
+    <script src="../js/lexical/patterns.js"></script>
+    <script src="../js/lexical/analyzer.js"></script>
+    <script src="../js/lexical/results.js"></script>
+    
+    <!-- Inicialización -->
+    <script src="../js/main.js"></script>
+</body>
+
+</html>
